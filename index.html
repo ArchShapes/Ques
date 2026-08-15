@@ -495,6 +495,108 @@ button {
     60% { transform: translate(-4px, -2px); }
     80% { transform: translate(4px, 2px); }
 }
+
+/* =========================
+   ESCALATION / DEEP HORROR
+========================= */
+
+.static-burst {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    opacity: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: screen;
+}
+
+.static-burst.on {
+    animation: staticBurst .35s steps(3, end) both;
+}
+
+@keyframes staticBurst {
+    0% { opacity: 0; }
+    15% { opacity: .9; }
+    30% { opacity: .1; }
+    45% { opacity: .95; }
+    60% { opacity: 0; }
+    75% { opacity: .7; }
+    100% { opacity: 0; }
+}
+
+.screen-tear {
+    animation: tear .18s steps(2, end) both;
+}
+
+@keyframes tear {
+    0% { clip-path: inset(0 0 0 0); transform: translate(0); }
+    20% { clip-path: inset(10% 0 60% 0); transform: translate(-12px, 0); }
+    40% { clip-path: inset(70% 0 5% 0); transform: translate(10px, 0); }
+    60% { clip-path: inset(30% 0 40% 0); transform: translate(-6px, 0); }
+    100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+}
+
+.deep-red {
+    animation: deepRed 2.4s ease-in-out infinite;
+}
+
+@keyframes deepRed {
+    0%, 100% { box-shadow: inset 0 0 220px rgba(0,0,0,.92); }
+    50% { box-shadow: inset 0 0 260px rgba(80,0,0,.55); }
+}
+
+.dread {
+    animation: dread 4s ease-in-out infinite;
+}
+
+@keyframes dread {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .55; }
+}
+
+.whisper-text {
+    position: fixed;
+    pointer-events: none;
+    z-index: 40;
+    color: rgba(139, 0, 0, 0.0);
+    font-size: 11px;
+    letter-spacing: .15em;
+    animation: whisperFlash .5s steps(2, end) forwards;
+}
+
+@keyframes whisperFlash {
+    0% { color: rgba(139, 0, 0, 0); }
+    40% { color: rgba(180, 20, 20, .85); }
+    100% { color: rgba(139, 0, 0, 0); }
+}
+
+.phantom-char {
+    animation: phantomPop .1s ease both;
+}
+
+@keyframes phantomPop {
+    0% { opacity: 0; transform: scale(1.4); color: #8b0000; }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.corrupted {
+    animation: corruptedText .15s steps(2, end) both;
+}
+
+@keyframes corruptedText {
+    0% { transform: skewX(0deg); }
+    50% { transform: skewX(-8deg); filter: blur(1px); }
+    100% { transform: skewX(0deg); }
+}
+
+body.finale {
+    animation: finaleThrob .9s ease-in-out infinite;
+}
+
+@keyframes finaleThrob {
+    0%, 100% { background-color: #030304; }
+    50% { background-color: #0a0202; }
+}
 </style>
 </head>
 
@@ -504,7 +606,8 @@ button {
 
     <div class="noise" id="noise"></div>
     <div class="scanlines"></div>
-    <div class="vignette"></div>
+    <div class="vignette" id="vignette"></div>
+    <div class="static-burst" id="staticBurst"></div>
 
     <main class="screen">
 
@@ -744,7 +847,8 @@ const questions = [
             "Don't trick me"
         ],
 
-        after: "It's getting closer to your chair."
+        after: "It's getting closer to your chair.",
+        burst: true
     },
 
     {
@@ -784,7 +888,8 @@ const questions = [
             "Let me out"
         ],
 
-        location: true
+        location: true,
+        burst: true
     },
 
     {
@@ -808,7 +913,8 @@ const questions = [
             "It's already inside"
         ],
 
-        knock: true
+        knock: true,
+        burst: true
     },
 
     {
@@ -834,11 +940,12 @@ const questions = [
             "I can't move my cursor"
         ],
 
-        response: "The door is locked."
+        response: "The door is locked.",
+        tear: true
     },
 
     {
-        text: "Do you give permission for the entity in your room to step closer?",
+        text: "Do you give permission for the entity in {location} to step closer?",
 
         answers: [
             "NO",
@@ -847,7 +954,8 @@ const questions = [
             "NO"
         ],
 
-        blackout: true
+        blackout: true,
+        location: true
     },
 
     {
@@ -860,7 +968,9 @@ const questions = [
             "Please stop"
         ],
 
-        response: "Too late."
+        response: "Too late.",
+        tear: true,
+        burst: true
     },
 
     {
@@ -873,13 +983,16 @@ const questions = [
             "..."
         ],
 
-        scare: true
+        scare: true,
+        finale: true
     },
 
     {
         text: "Look at me.",
 
-        input: true
+        input: true,
+        phantom: true,
+        finale: true
     }
 
 ];
@@ -1185,6 +1298,124 @@ function flicker(type = "glitch") {
 
 }
 
+function staticBurst() {
+
+    if (!state.effects) {
+        return;
+    }
+
+    const burst =
+        $("staticBurst");
+
+    burst.classList.remove("on");
+
+    void burst.offsetWidth;
+
+    burst.classList.add("on");
+
+    setTimeout(() => {
+
+        burst.classList.remove("on");
+
+    }, 400);
+
+}
+
+function tearScreen() {
+
+    if (!state.effects) {
+        return;
+    }
+
+    const screen =
+        document.querySelector(".screen");
+
+    screen.classList.remove("screen-tear");
+
+    void screen.offsetWidth;
+
+    screen.classList.add("screen-tear");
+
+    setTimeout(() => {
+
+        screen.classList.remove("screen-tear");
+
+    }, 250);
+
+}
+
+function deepenDread() {
+
+    $("vignette").classList.add("deep-red", "dread");
+
+}
+
+function enterFinale() {
+
+    document.body.classList.add("finale");
+
+    deepenDread();
+
+}
+
+
+/* =========================
+   PHANTOM TYPING
+========================= */
+
+async function runPhantomTyping(input) {
+
+    const phantomLines = [
+        "i am right behind",
+        "turn around",
+        "it's too late to type"
+    ];
+
+    await delay(2200);
+
+    if (document.activeElement !== input) {
+        return;
+    }
+
+    const line =
+        phantomLines[
+            Math.floor(
+                Math.random() * phantomLines.length
+            )
+        ];
+
+    const original = input.value;
+
+    input.readOnly = true;
+
+    flicker("glitch");
+
+    for (let i = 0; i < line.length; i++) {
+
+        await delay(55 + Math.random() * 40);
+
+        input.value += line[i];
+
+    }
+
+    await delay(700);
+
+    tearScreen();
+
+    for (let i = input.value.length; i > original.length; i--) {
+
+        await delay(18);
+
+        input.value = input.value.slice(0, -1);
+
+    }
+
+    input.readOnly = false;
+    input.value = original;
+    input.focus();
+
+}
+
 
 /* =========================
    DELAY
@@ -1349,7 +1580,31 @@ async function renderQuestion() {
             temporal.timezone +
             " (" +
             temporal.utcOffset +
-            ")";
+            ")" +
+            "<br>" +
+            "SUBJECT HAS BEEN AWAKE " +
+            temporal.minutesSinceMidnight +
+            " MINUTES INTO THIS DAY.";
+
+        $("question")
+            .appendChild(note);
+
+    }
+
+    if (question.location && question.blackout !== true) {
+
+        const note =
+            document.createElement("div");
+
+        note.className =
+            "location-note";
+
+        note.innerHTML =
+            "TRACKING: <strong>" +
+            state.location +
+            "</strong>" +
+            "<br>" +
+            "The lights nearest to you are dimming on purpose.";
 
         $("question")
             .appendChild(note);
@@ -1367,7 +1622,9 @@ async function renderQuestion() {
         note.textContent =
             "Target Hardware: " +
             state.device +
-            " — Camera feed active.";
+            " — Camera feed active — " +
+            state.location +
+            ".";
 
         $("question")
             .appendChild(note);
@@ -1429,6 +1686,12 @@ async function renderQuestion() {
         }, 100);
 
         input.focus();
+
+        if (question.phantom && state.effects) {
+
+            runPhantomTyping(input);
+
+        }
 
     } else {
 
@@ -1509,7 +1772,10 @@ async function renderQuestion() {
     }
 
 
-    /* Flickers & Jumpscares */
+    /* Flickers & Jumpscares — escalating curve */
+    /* Early questions: sparse, single small effects.        */
+    /* Mid questions: paired effects, dread deepens.          */
+    /* Final stretch: relentless, stacked, finale mode locks. */
 
     if (state.index === 4) {
         setTimeout(() => flicker("flash"), 800);
@@ -1519,17 +1785,33 @@ async function renderQuestion() {
         setTimeout(() => flicker("shake"), 600);
     }
 
+    if (question.burst) {
+        setTimeout(() => staticBurst(), 550);
+    }
+
     if (state.index === 9) {
         setTimeout(() => flicker("glitch"), 500);
+        setTimeout(() => deepenDread(), 700);
+    }
+
+    if (question.tear) {
+        setTimeout(() => tearScreen(), 450);
     }
 
     if (state.index === 12) {
-        setTimeout(() => flicker("flash"), 400);
+        setTimeout(() => flicker("flash"), 300);
+        setTimeout(() => staticBurst(), 650);
     }
 
     if (state.index === 14) {
-        setTimeout(() => flicker("glitch"), 300);
-        setTimeout(() => flicker("shake"), 900);
+        setTimeout(() => flicker("glitch"), 200);
+        setTimeout(() => tearScreen(), 500);
+        setTimeout(() => flicker("shake"), 850);
+        setTimeout(() => staticBurst(), 1100);
+    }
+
+    if (question.finale) {
+        enterFinale();
     }
 
 }
@@ -1661,6 +1943,7 @@ function next() {
 function finish() {
 
     show("message");
+    enterFinale();
 
     const message =
         $("message");
@@ -1671,6 +1954,7 @@ function finish() {
         "</div>";
 
     setTimeout(() => {
+        staticBurst();
         flicker("flash");
         message.innerHTML =
             '<div class="big bloodred">' +
@@ -1679,6 +1963,7 @@ function finish() {
     }, 1500);
 
     setTimeout(() => {
+        tearScreen();
         message.innerHTML =
             '<div class="big">' +
             "Look behind you." +
@@ -1687,11 +1972,30 @@ function finish() {
 
     setTimeout(() => {
         flicker("shake");
+        staticBurst();
         message.innerHTML =
             '<div class="big bloodred" style="font-size:clamp(20px, 4vw, 32px);">' +
             "DON'T MOVE." +
             "</div>";
     }, 5000);
+
+    setTimeout(() => {
+        flicker("glitch");
+        tearScreen();
+        message.innerHTML =
+            '<div class="big bloodred" style="font-size:clamp(22px, 5vw, 36px);">' +
+            "I'M ALREADY IN THE ROOM WITH YOU." +
+            "</div>" +
+            '<div class="small">THE SCREEN WAS NEVER THE ONLY WAY IN.</div>';
+    }, 7200);
+
+    setTimeout(() => {
+        message.innerHTML =
+            '<div class="big" style="letter-spacing:.25em;">' +
+            "..." +
+            "</div>" +
+            '<div class="small">refresh to try again, if you dare.</div>';
+    }, 10500);
 
 }
 
