@@ -112,7 +112,22 @@ button {
     margin: 0 0 40px;
     font-size: clamp(12px, 3vw, 24px);
     font-weight: 700;
-    letter-spacing: .2em;
+    letter-spacing: .28em;
+    text-shadow: 0 0 24px rgba(139, 0, 0, .18), 1px 0 0 rgba(139, 0, 0, .12);
+    position: relative;
+}
+
+.brand::after {
+    content: "THE QUESTIONNAIRE";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    color: #4a0f0f;
+    opacity: .35;
+    filter: blur(2px);
+    transform: translate(2px, 3px);
+    z-index: -1;
 }
 
 .subtitle {
@@ -120,7 +135,7 @@ button {
     margin-bottom: 35px;
     color: var(--muted);
     font-size: 10px;
-    letter-spacing: .12em;
+    letter-spacing: .16em;
 }
 
 .menu-buttons {
@@ -133,25 +148,28 @@ button {
 .menu-btn {
     min-height: 40px;
     border: 1px solid var(--line);
+    border-left: 2px solid #2a1414;
     background: rgba(255,255,255,.015);
     cursor: pointer;
     font-size: 10px;
     letter-spacing: .1em;
     transition: .18s ease;
+    clip-path: polygon(0 0, 100% 0, 100% 92%, 98% 100%, 0 100%);
 }
 
 .menu-btn:hover {
     background: var(--hover);
     border-color: #33373f;
+    border-left-color: #6b1a1a;
     transform: translateY(-1px);
-    box-shadow: var(--glow);
+    box-shadow: var(--glow), inset 3px 0 0 rgba(139,0,0,.25);
 }
 
 .footer {
     margin-top: 45px;
     color: #31353a;
     font-size: 8px;
-    letter-spacing: .12em;
+    letter-spacing: .18em;
 }
 
 /* =========================
@@ -164,7 +182,9 @@ button {
     padding: 24px;
     background: rgba(8,9,11,.98);
     border: 1px solid var(--line);
-    box-shadow: 0 30px 100px rgba(0,0,0,.8);
+    border-top: 1px solid #2a1414;
+    box-shadow: 0 30px 100px rgba(0,0,0,.8), inset 0 1px 0 rgba(139,0,0,.06);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 1.5% 100%, 0 97%);
     animation: appear .4s ease both;
 }
 
@@ -299,6 +319,7 @@ button {
     line-height: 1.4;
     letter-spacing: -.01em;
     text-align: center;
+    text-shadow: 0 0 30px rgba(0,0,0,.6);
 }
 
 .question > div:first-child {
@@ -344,6 +365,7 @@ button {
     min-height: 42px;
     padding: 12px 16px;
     border: 1px solid var(--line);
+    border-left: 2px solid #2a1414;
     background: rgba(255,255,255,.015);
     color: #b8baae;
     text-align: left;
@@ -355,13 +377,15 @@ button {
         border-color .18s ease,
         box-shadow .18s ease;
     font-size: 11px;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 99% 100%, 0 88%);
 }
 
 .answer:hover {
     background: var(--hover);
     border-color: #33373f;
+    border-left-color: #6b1a1a;
     transform: translateY(-1px);
-    box-shadow: var(--glow);
+    box-shadow: var(--glow), inset 3px 0 0 rgba(139,0,0,.2);
 }
 
 .answer:active {
@@ -370,7 +394,7 @@ button {
 
 .num {
     margin-right: 12px;
-    color: #44484e;
+    color: #5a1616;
     font-size: 9px;
 }
 
@@ -667,7 +691,7 @@ body.finale {
 }
 
 .bsod.on {
-    animation: bsodFlash 1s steps(1, end) both;
+    animation: bsodFlash 4s steps(1, end) both;
 }
 
 .bsod-content {
@@ -691,6 +715,171 @@ body.finale {
     90% { opacity: 1; }
     100% { opacity: 0; }
 }
+
+/* =========================
+   REAL JUMPSCARE
+========================= */
+
+.jumpscare {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.jumpscare.fire {
+    animation: jumpscareFire .55s cubic-bezier(.1, .9, .2, 1) both;
+}
+
+.jumpscare-face {
+    width: min(100vw, 100vh);
+    height: min(100vw, 100vh);
+    max-width: 900px;
+    max-height: 900px;
+}
+
+@keyframes jumpscareFire {
+    0% { opacity: 0; transform: scale(.85); }
+    4% { opacity: 1; transform: scale(1.25); filter: contrast(1.6) brightness(1.3); }
+    10% { opacity: 1; transform: scale(1.05); filter: none; }
+    18% { opacity: 1; transform: scale(1.15); }
+    26% { opacity: 1; transform: scale(1); }
+    92% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+body.scream-cut {
+    animation: screamCut .12s steps(1, end) both;
+}
+
+@keyframes screamCut {
+    0% { background: #000; }
+    100% { background: #030304; }
+}
+
+/* =========================
+   SAVE / LOAD UI
+========================= */
+
+.save-note {
+    margin-top: -20px;
+    margin-bottom: 30px;
+    color: #6b2020;
+    font-size: 9px;
+    letter-spacing: .12em;
+    line-height: 1.8;
+    animation: fadeIn 1.2s ease forwards;
+}
+
+.save-note strong {
+    color: #a83030;
+}
+
+/* =========================
+   BACKGROUND EYES
+========================= */
+
+.eye-field {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.bg-eye {
+    position: absolute;
+    width: 46px;
+    height: 26px;
+    opacity: 0;
+}
+
+.bg-eye svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.bg-eye.staring {
+    animation: eyeStare 2.6s ease-in-out both;
+}
+
+@keyframes eyeStare {
+    0% { opacity: 0; transform: scaleY(0.1); }
+    8% { opacity: .85; transform: scaleY(1); }
+    14% { transform: scaleY(0.05); }
+    18% { transform: scaleY(1); }
+    82% { opacity: .85; transform: scaleY(1); }
+    92% { transform: scaleY(0.05); }
+    100% { opacity: 0; transform: scaleY(0.1); }
+}
+
+/* =========================
+   CORRUPTION TIERS
+   The more the page has been played, the less stable it feels.
+========================= */
+
+body.corrupt-1 .brand {
+    animation: corruptJitter 7s ease-in-out infinite;
+}
+
+body.corrupt-2 .brand {
+    animation: corruptJitter 4.5s ease-in-out infinite;
+}
+
+body.corrupt-2 .menu-btn,
+body.corrupt-2 .answer {
+    border-color: #3a1414;
+}
+
+body.corrupt-3 .brand {
+    animation: corruptJitter 2.6s ease-in-out infinite;
+    color: #d8caca;
+}
+
+body.corrupt-3 .footer,
+body.corrupt-3 .subtitle {
+    color: #6b2020;
+}
+
+body.corrupt-3 .rust-layer {
+    opacity: .28;
+}
+
+body.corrupt-4 .brand {
+    animation: corruptJitter 1.4s ease-in-out infinite, corruptGlitchText .3s steps(2, end) infinite;
+    color: #e8d5d5;
+}
+
+body.corrupt-4 .vignette {
+    box-shadow: inset 0 0 260px rgba(90, 0, 0, .75) !important;
+}
+
+body.corrupt-4 .noise {
+    opacity: .18;
+}
+
+body.corrupt-4 .sickly-flicker {
+    animation-duration: 2.8s;
+}
+
+@keyframes corruptJitter {
+    0%, 90%, 100% { transform: translate(0, 0); }
+    91% { transform: translate(-1px, 1px); }
+    92% { transform: translate(1px, -1px); }
+    93% { transform: translate(0, 0); }
+}
+
+@keyframes corruptGlitchText {
+    0%, 96% { text-shadow: none; }
+    97% { text-shadow: -2px 0 #8b0000, 2px 0 #002828; }
+    98% { text-shadow: none; }
+}
 </style>
 </head>
 
@@ -703,6 +892,7 @@ body.finale {
     <div class="vignette" id="vignette"></div>
     <div class="static-burst" id="staticBurst"></div>
     <div class="rust-layer"></div>
+    <div class="eye-field" id="eyeField"></div>
     <div class="bsod" id="bsod">
         <div class="bsod-content">
             <div class="sad">:(</div>
@@ -712,6 +902,33 @@ body.finale {
                 0% COMPLETE
             </div>
         </div>
+    </div>
+
+    <div class="jumpscare" id="jumpscare">
+        <svg class="jumpscare-face" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <radialGradient id="jsGlow" cx="50%" cy="42%" r="65%">
+                    <stop offset="0%" stop-color="#f2f2f2"/>
+                    <stop offset="55%" stop-color="#c9c9c9"/>
+                    <stop offset="100%" stop-color="#050505"/>
+                </radialGradient>
+                <filter id="jsRough">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="3" seed="9" result="turb"/>
+                    <feDisplacementMap in="SourceGraphic" in2="turb" scale="18"/>
+                </filter>
+            </defs>
+            <rect x="0" y="0" width="400" height="400" fill="#000"/>
+            <g filter="url(#jsRough)">
+                <ellipse cx="200" cy="205" rx="150" ry="185" fill="url(#jsGlow)"/>
+                <ellipse cx="140" cy="185" rx="26" ry="38" fill="#050505"/>
+                <ellipse cx="260" cy="185" rx="26" ry="38" fill="#050505"/>
+                <ellipse cx="140" cy="185" rx="9" ry="13" fill="#8b0000"/>
+                <ellipse cx="260" cy="185" rx="9" ry="13" fill="#8b0000"/>
+                <path d="M 110 300 Q 200 380 290 300 Q 260 250 200 255 Q 140 250 110 300 Z" fill="#050505"/>
+                <path d="M 130 300 L 145 260 L 160 300 L 175 255 L 190 300 L 205 255 L 220 300 L 235 255 L 250 300 L 265 260 L 280 300"
+                      stroke="#8b0000" stroke-width="3" fill="none" stroke-linecap="round"/>
+            </g>
+        </svg>
     </div>
 
     <main class="screen">
@@ -726,10 +943,16 @@ body.finale {
                 A PERSONAL EVALUATION
             </div>
 
+            <div class="save-note hidden" id="saveNote"></div>
+
             <div class="menu-buttons">
 
                 <button class="menu-btn" id="begin">
                     BEGIN
+                </button>
+
+                <button class="menu-btn hidden" id="continueBtn">
+                    CONTINUE
                 </button>
 
                 <button class="menu-btn" id="settingsOpen">
@@ -740,10 +963,27 @@ body.finale {
                     ABOUT
                 </button>
 
+                <button class="menu-btn hidden" id="resetBtn">
+                    ERASE SAVE
+                </button>
+
             </div>
 
-            <div class="footer">
+            <div class="footer" id="menuFooter">
                 DO NOT LOOK AWAY
+            </div>
+
+        </section>
+
+
+        <section id="loadgame" class="loading hidden">
+
+            <h2 class="loading-title">
+                READING SAVED STATE<span class="loading-dots"></span>
+            </h2>
+
+            <div class="loading-status" id="loadStatus">
+                Locating what's left of you
             </div>
 
         </section>
@@ -860,6 +1100,18 @@ body.finale {
     preload="auto">
 </audio>
 
+<audio
+    id="voiceMale"
+    src="male.mp3"
+    preload="auto">
+</audio>
+
+<audio
+    id="voiceFemale"
+    src="female.mp3"
+    preload="auto">
+</audio>
+
 
 <script>
 
@@ -867,6 +1119,7 @@ const $ = id => document.getElementById(id);
 
 const screens = [
     "menu",
+    "loadgame",
     "settings",
     "about",
     "loading",
@@ -889,9 +1142,82 @@ const state = {
     location: "your location",
     country: "a place you've been before",
     localTime: "--:--",
-    device: "unknown"
+    device: "unknown",
+
+    playCount: 0,
+    corruption: 0,
+    maxIndexReached: 0
 
 };
+
+
+/* =========================
+   SAVE / CORRUPTION SYSTEM
+========================= */
+
+const SAVE_KEY = "questionnaire_save_v1";
+
+function loadSave() {
+
+    try {
+
+        const raw =
+            localStorage.getItem(SAVE_KEY);
+
+        if (!raw) {
+            return null;
+        }
+
+        const data =
+            JSON.parse(raw);
+
+        return data;
+
+    } catch (error) {
+
+        return null;
+
+    }
+
+}
+
+function writeSave() {
+
+    try {
+
+        localStorage.setItem(
+            SAVE_KEY,
+            JSON.stringify({
+                playCount: state.playCount,
+                corruption: state.corruption,
+                maxIndexReached: state.maxIndexReached
+            })
+        );
+
+    } catch (error) {
+
+    }
+
+}
+
+function applyCorruptionTier() {
+
+    // Corruption climbs a little each completed or abandoned playthrough.
+    // Higher tiers push the whole page further from stable.
+    document.body.classList.remove(
+        "corrupt-1", "corrupt-2", "corrupt-3", "corrupt-4"
+    );
+
+    const tier =
+        Math.min(4, Math.floor(state.corruption / 2) + (state.playCount > 0 ? 1 : 0));
+
+    if (tier > 0) {
+        document.body.classList.add("corrupt-" + tier);
+    }
+
+    return tier;
+
+}
 
 
 /* =========================
@@ -923,23 +1249,23 @@ const questions = [
     },
 
     {
-        text: "Why did you lock your eyes on the center of the screen?",
+        text: "Something just moved behind you in the screen's reflection. Why haven't you turned around?",
 
         answers: [
-            "Habit",
-            "To read the text",
-            "I'm afraid to look away",
-            "Mistake"
+            "It was nothing",
+            "I'm scared to",
+            "I already know what it is",
+            "Stop describing my room"
         ]
     },
 
     {
-        text: "When was the last time you heard breathing that wasn't yours?",
+        text: "Your hands are colder than they were five questions ago. Did you notice?",
 
         answers: [
-            "Never",
-            "Earlier today",
-            "Just now",
+            "No",
+            "Yes, just now",
+            "Someone else noticed first",
             "Stop asking"
         ]
     },
@@ -1025,16 +1351,16 @@ const questions = [
     },
 
     {
-        text: "Do you recognize the breathing pattern coming through your speakers?",
+        text: "There's a second cursor blinking on your screen. It isn't yours. Whose is it?",
 
         answers: [
-            "It's mine",
-            "It's heavier than mine",
-            "It's right beside me",
-            "Cut the audio"
+            "I don't have a second cursor",
+            "It just moved",
+            "It's hovering over the exit button",
+            "Make it stop"
         ],
 
-        response: "It doesn't match yours."
+        response: "It's mine now."
     },
 
     {
@@ -1066,12 +1392,12 @@ const questions = [
     },
 
     {
-        text: "Why did you think ignoring it would make it go away?",
+        text: "It has been standing closer than you'd like for three questions now. Why haven't you asked it to leave?",
 
         answers: [
-            "It was my only choice",
+            "I didn't know it was there",
             "I was terrified",
-            "I made a mistake",
+            "I don't think it takes requests",
             "Please stop"
         ],
 
@@ -1560,7 +1886,127 @@ function triggerBsod() {
 
         bsod.classList.remove("on");
 
-    }, 1000);
+    }, 4000);
+
+}
+
+
+/* =========================
+   REAL JUMPSCARE
+========================= */
+
+function playJumpscareSting() {
+
+    if (!state.sounds) {
+        return;
+    }
+
+    const ctx = getAudioCtx();
+
+    if (!ctx) {
+        return;
+    }
+
+    if (ctx.state === "suspended") {
+        ctx.resume().catch(() => {});
+    }
+
+    const now = ctx.currentTime;
+
+    // Harsh noise burst
+    const bufferSize = ctx.sampleRate * 0.4;
+    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+    }
+
+    const noise = ctx.createBufferSource();
+    noise.buffer = noiseBuffer;
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.9, now);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+
+    noise.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    noise.start(now);
+
+    // Sharp descending shriek stacked on top
+    const osc = ctx.createOscillator();
+    const oscGain = ctx.createGain();
+
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(1400, now);
+    osc.frequency.exponentialRampToValueAtTime(90, now + 0.5);
+
+    oscGain.gain.setValueAtTime(0.5, now);
+    oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+    osc.connect(oscGain);
+    oscGain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.55);
+
+    // Sub-bass hit for physical punch
+    const sub = ctx.createOscillator();
+    const subGain = ctx.createGain();
+
+    sub.type = "sine";
+    sub.frequency.setValueAtTime(60, now);
+
+    subGain.gain.setValueAtTime(0.8, now);
+    subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+
+    sub.connect(subGain);
+    subGain.connect(ctx.destination);
+    sub.start(now);
+    sub.stop(now + 0.3);
+
+}
+
+function triggerJumpscare() {
+
+    if (!state.effects) {
+        return;
+    }
+
+    playJumpscareSting();
+    playErrorBeep();
+
+    const jump =
+        $("jumpscare");
+
+    jump.classList.remove("fire");
+
+    void jump.offsetWidth;
+
+    jump.classList.add("fire");
+
+    document.body.classList.add("shake");
+
+    if (navigator.vibrate) {
+        navigator.vibrate([80, 30, 120]);
+    }
+
+    setTimeout(() => {
+
+        document.body.classList.remove("shake");
+
+    }, 350);
+
+    setTimeout(() => {
+
+        jump.classList.remove("fire");
+
+        document.body.classList.add("scream-cut");
+
+        setTimeout(() => {
+            document.body.classList.remove("scream-cut");
+        }, 150);
+
+    }, 700);
 
 }
 
@@ -1594,6 +2040,158 @@ function playRandomKnock(forceLoud) {
 
     knock.play()
         .catch(() => {});
+
+}
+
+
+/* =========================
+   RANDOM VOICE (male.mp3 / female.mp3)
+========================= */
+
+function playRandomVoice() {
+
+    if (!state.sounds) {
+        return;
+    }
+
+    const useMale =
+        Math.random() < 0.5;
+
+    const voice =
+        useMale ? $("voiceMale") : $("voiceFemale");
+
+    voice.currentTime = 0;
+
+    const loudRoll =
+        Math.random();
+
+    if (loudRoll < 0.35) {
+        voice.volume = 0.2 + Math.random() * 0.15;
+    } else if (loudRoll < 0.7) {
+        voice.volume = 0.55 + Math.random() * 0.15;
+    } else {
+        voice.volume = 0.9;
+        flicker("glitch");
+    }
+
+    voice.play()
+        .catch(() => {});
+
+}
+
+
+/* =========================
+   BACKGROUND EYES
+   Eyes that occasionally appear in the dark and stare
+   before vanishing — independent of any other effect.
+========================= */
+
+const EYE_SVG =
+    '<svg viewBox="0 0 46 26" xmlns="http://www.w3.org/2000/svg">' +
+    '<ellipse cx="23" cy="13" rx="21" ry="11" fill="#050505" stroke="#3a1414" stroke-width="1"/>' +
+    '<circle cx="23" cy="13" r="7" fill="#8b0000"/>' +
+    '<circle cx="23" cy="13" r="2.6" fill="#000"/>' +
+    '</svg>';
+
+let eyeLoopActive = false;
+
+function spawnEye() {
+
+    if (!state.effects) {
+        return;
+    }
+
+    const field =
+        $("eyeField");
+
+    if (!field) {
+        return;
+    }
+
+    const eye =
+        document.createElement("div");
+
+    eye.className = "bg-eye";
+    eye.innerHTML = EYE_SVG;
+
+    const edgeMargin = 8;
+
+    const top =
+        edgeMargin + Math.random() * (100 - edgeMargin * 2);
+
+    const left =
+        edgeMargin + Math.random() * (100 - edgeMargin * 2);
+
+    eye.style.top = top + "vh";
+    eye.style.left = left + "vw";
+
+    const scale =
+        0.7 + Math.random() * 0.9;
+
+    eye.style.transform =
+        "scale(" + scale + ")";
+
+    field.appendChild(eye);
+
+    requestAnimationFrame(() => {
+        eye.classList.add("staring");
+    });
+
+    setTimeout(() => {
+        eye.remove();
+    }, 2700);
+
+}
+
+function scheduleNextEye() {
+
+    if (!eyeLoopActive) {
+        return;
+    }
+
+    // Frequency and pairing scale with corruption — more played,
+    // more eyes, closer together, harder to ignore.
+    const tier =
+        applyCorruptionTier();
+
+    const baseDelay =
+        Math.max(3500, 11000 - tier * 1800);
+
+    const delayMs =
+        baseDelay + Math.random() * 9000;
+
+    setTimeout(() => {
+
+        if (!eyeLoopActive) {
+            return;
+        }
+
+        spawnEye();
+
+        if (tier >= 3 && Math.random() < 0.4) {
+            setTimeout(() => spawnEye(), 300 + Math.random() * 500);
+        }
+
+        scheduleNextEye();
+
+    }, delayMs);
+
+}
+
+function startEyeLoop() {
+
+    if (eyeLoopActive) {
+        return;
+    }
+
+    eyeLoopActive = true;
+    scheduleNextEye();
+
+}
+
+function stopEyeLoop() {
+
+    eyeLoopActive = false;
 
 }
 
@@ -1784,11 +2382,18 @@ async function renderQuestion() {
 
     // Unscripted ambient knock — small random chance per question,
     // independent of the scripted "knock" question, so it can
-    // strike anywhere and never plays predictably.
+    // strike anywhere and never plays predictably. Chance rises
+    // with corruption from prior playthroughs.
+    const corruptTier =
+        applyCorruptionTier();
+
+    const knockChance =
+        0.18 + corruptTier * 0.05;
+
     if (
         !question.knock &&
         state.index > 0 &&
-        Math.random() < 0.18
+        Math.random() < knockChance
     ) {
 
         setTimeout(() => {
@@ -1796,6 +2401,41 @@ async function renderQuestion() {
             playRandomKnock();
 
         }, 900 + Math.random() * 1800);
+
+    }
+
+    // Unscripted ambient voice — independent random chance, so it
+    // can land on its own beat, separate from the knock timing.
+    const voiceChance =
+        0.16 + corruptTier * 0.05;
+
+    if (
+        state.index > 1 &&
+        Math.random() < voiceChance
+    ) {
+
+        setTimeout(() => {
+
+            playRandomVoice();
+
+        }, 1100 + Math.random() * 2200);
+
+    }
+
+    // Extra unscripted jumpscare on high-corruption replays —
+    // never on a first playthrough, so returning players are the
+    // ones punished by what the page "remembers."
+    if (
+        corruptTier >= 3 &&
+        state.index > 2 &&
+        Math.random() < 0.08
+    ) {
+
+        setTimeout(() => {
+
+            triggerJumpscare();
+
+        }, 1200 + Math.random() * 2000);
 
     }
 
@@ -1843,6 +2483,30 @@ async function renderQuestion() {
         );
 
     await typeQuestion(text);
+
+    if (state.index === 0 && corruptTier >= 2) {
+
+        const memory =
+            document.createElement("div");
+
+        memory.className =
+            "subquestion bloodred";
+
+        const memoryLines = [
+            "You've sat in that chair before.",
+            "Last time you also said you'd stop after one question.",
+            "Welcome back. I kept your answers."
+        ];
+
+        memory.textContent =
+            memoryLines[
+                Math.min(memoryLines.length - 1, corruptTier - 2)
+            ];
+
+        $("question")
+            .appendChild(memory);
+
+    }
 
     if (question.time) {
 
@@ -2050,9 +2714,14 @@ async function renderQuestion() {
 
 
     /* Flickers & Jumpscares — escalating curve */
-    /* Early questions: sparse, single small effects.        */
-    /* Mid questions: paired effects, dread deepens.          */
-    /* Final stretch: relentless, stacked, finale mode locks. */
+    /* Early questions: sparse, single small effects — then one   */
+    /* real jumpscare early to break the false sense of calm.     */
+    /* Mid questions: paired effects, dread deepens.               */
+    /* Final stretch: relentless, stacked, finale mode locks.      */
+
+    if (state.index === 3) {
+        setTimeout(() => triggerJumpscare(), 1400);
+    }
 
     if (state.index === 4) {
         setTimeout(() => flicker("flash"), 800);
@@ -2186,7 +2855,7 @@ function answer(value) {
     }
 
     if (question.scare) {
-        flicker("glitch");
+        triggerJumpscare();
     }
 
     next();
@@ -2199,6 +2868,13 @@ function answer(value) {
 ========================= */
 
 function next() {
+
+    if (
+        state.index >
+        state.maxIndexReached
+    ) {
+        state.maxIndexReached = state.index;
+    }
 
     if (
         state.index >=
@@ -2226,6 +2902,11 @@ function finish() {
 
     show("message");
     enterFinale();
+
+    state.corruption =
+        Math.min(10, state.corruption + 1);
+
+    writeSave();
 
     const message =
         $("message");
@@ -2297,6 +2978,9 @@ $("begin").onclick = async () => {
 
     state.loading = true;
 
+    state.playCount += 1;
+    writeSave();
+
     show("loading");
 
     stopMenuMusic();
@@ -2311,6 +2995,67 @@ $("begin").onclick = async () => {
     show("survey");
 
     renderQuestion();
+
+};
+
+
+$("continueBtn").onclick = async () => {
+
+    if (
+        state.loading ||
+        state.started
+    ) {
+        return;
+    }
+
+    state.loading = true;
+
+    show("loadgame");
+
+    stopMenuMusic();
+
+    const statuses = [
+        "Locating what's left of you",
+        "Reassembling prior session",
+        "Some of this was never saved by choice"
+    ];
+
+    for (const line of statuses) {
+        $("loadStatus").textContent = line;
+        await delay(700);
+    }
+
+    state.playCount += 1;
+    writeSave();
+
+    await prepareSurvey();
+
+    state.started = true;
+    state.loading = false;
+    state.index = 0;
+    state.knockPlayed = false;
+
+    applyCorruptionTier();
+
+    show("survey");
+
+    renderQuestion();
+
+};
+
+
+$("resetBtn").onclick = () => {
+
+    try {
+        localStorage.removeItem(SAVE_KEY);
+    } catch (error) {}
+
+    state.playCount = 0;
+    state.corruption = 0;
+    state.maxIndexReached = 0;
+
+    applyCorruptionTier();
+    updateMenuForSave();
 
 };
 
@@ -2384,7 +3129,62 @@ document
    INITIALIZATION
 ========================= */
 
+function updateMenuForSave() {
+
+    const saved =
+        loadSave();
+
+    const continueBtn =
+        $("continueBtn");
+
+    const resetBtn =
+        $("resetBtn");
+
+    const note =
+        $("saveNote");
+
+    const footer =
+        $("menuFooter");
+
+    if (saved && saved.playCount > 0) {
+
+        state.playCount = saved.playCount;
+        state.corruption = saved.corruption || 0;
+        state.maxIndexReached = saved.maxIndexReached || 0;
+
+        continueBtn.classList.remove("hidden");
+        resetBtn.classList.remove("hidden");
+
+        note.classList.remove("hidden");
+
+        const times =
+            saved.playCount === 1 ? "once" : saved.playCount + " times";
+
+        note.innerHTML =
+            "A trace of you remains from <strong>" + times + "</strong> before.<br>" +
+            "It got further into you each time.";
+
+        if (saved.corruption >= 4) {
+            footer.textContent = "IT REMEMBERS YOU NOW";
+        } else if (saved.corruption >= 2) {
+            footer.textContent = "SOMETHING DIDN'T LEAVE LAST TIME";
+        }
+
+    } else {
+
+        continueBtn.classList.add("hidden");
+        resetBtn.classList.add("hidden");
+        note.classList.add("hidden");
+
+    }
+
+    applyCorruptionTier();
+
+}
+
+updateMenuForSave();
 updateSettings();
+startEyeLoop();
 
 // Trigger menu music when interacting with document if permitted
 document.addEventListener('click', () => {
