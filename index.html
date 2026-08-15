@@ -781,6 +781,7 @@ const state = {
     knockPlayed: false,
 
     location: "your location",
+    country: "a place you've been before",
     localTime: "--:--",
     device: "unknown"
 
@@ -879,16 +880,16 @@ const questions = [
     },
 
     {
-        text: "It is remarkably quiet outside your window in {location}. Can you hear what's waiting out there?",
+        text: "I liked my trip to {country}. Did you ever go there?",
 
         answers: [
-            "It's just wind",
-            "There's someone outside",
-            "Shut up",
+            "No",
+            "Once",
+            "I don't remember telling you that",
             "Let me out"
         ],
 
-        location: true,
+        country: true,
         burst: true
     },
 
@@ -1234,7 +1235,10 @@ async function getLocationName() {
         }
 
         if (parts.length) {
-            return parts.join(", ");
+            return {
+                full: parts.join(", "),
+                country: data.country_name || null
+            };
         }
 
     } catch (error) {
@@ -1258,13 +1262,22 @@ async function getLocationName() {
 
         };
 
-        return zones[timezone] ||
+        const fallback =
+            zones[timezone] ||
             timezone ||
             "your isolated room";
 
+        return {
+            full: fallback,
+            country: zones[timezone] || null
+        };
+
     } catch (error) {
 
-        return "your isolated room";
+        return {
+            full: "your isolated room",
+            country: null
+        };
 
     }
 
@@ -1449,8 +1462,15 @@ async function prepareSurvey() {
     state.localTime =
         temporal.time;
 
-    state.location =
+    const locationData =
         await locationPromise;
+
+    state.location =
+        locationData.full;
+
+    state.country =
+        locationData.country ||
+        state.location;
 
     // Keep the loading phase deterministic while still allowing
     // network-based location detection to finish.
@@ -1552,10 +1572,20 @@ async function renderQuestion() {
 
     }
 
+    if (question.country) {
+
+        text =
+            text.replaceAll(
+                "{country}",
+                state.country
+            );
+
+    }
+
     // Prevent unresolved template tokens from ever reaching the screen.
     text =
         text.replaceAll(
-            /\\{(time|location)\\}/g,
+            /\\{(time|location|country)\\}/g,
             "the current moment"
         );
 
