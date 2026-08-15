@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Questionnaire</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+    --bg: #030304;
+    --panel: #08090b;
+    --text: #c8c9cb;
+    --muted: #55585e;
+    --line: #181b20;
+    --hover: #0f1115;
+    --glow: 0 0 20px rgba(200, 205, 210, .08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Space Mono", monospace;
+    overflow: hidden;
+    user-select: none;
+}
+
+button,
+input {
+    font-family: inherit;
+}
+
+button {
+    color: inherit;
+}
+
+#app {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    position: relative;
+}
+
+.screen {
+    width: min(760px, calc(100vw - 48px));
+    position: relative;
+    z-index: 3;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================
+   EFFECTS
+========================= */
+
+.noise,
+.scanlines,
+.vignette {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.noise {
+    opacity: .08;
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
+    mix-blend-mode: screen;
+}
+
+.scanlines {
+    opacity: .07;
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0,
+            transparent 2px,
+            rgba(0,0,0,.4) 3px,
+            transparent 4px
+        );
+}
+
+.vignette {
+    box-shadow: inset 0 0 220px rgba(0,0,0,.92);
+}
+
+/* =========================
+   MAIN MENU
+========================= */
+
+.menu {
+    text-align: center;
+    animation: appear .7s ease both;
+}
+
+.brand {
+    margin: 0 0 40px;
+    font-size: clamp(12px, 3vw, 24px);
+    font-weight: 700;
+    letter-spacing: .2em;
+}
+
+.subtitle {
+    margin-top: -24px;
+    margin-bottom: 35px;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: .12em;
+}
+
+.menu-buttons {
+    width: 200px;
+    display: grid;
+    gap: 8px;
+    margin: auto;
+}
+
+.menu-btn {
+    min-height: 40px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.015);
+    cursor: pointer;
+    font-size: 10px;
+    letter-spacing: .1em;
+    transition: .18s ease;
+}
+
+.menu-btn:hover {
+    background: var(--hover);
+    border-color: #33373f;
+    transform: translateY(-1px);
+    box-shadow: var(--glow);
+}
+
+.footer {
+    margin-top: 45px;
+    color: #31353a;
+    font-size: 8px;
+    letter-spacing: .12em;
+}
+
+/* =========================
+   PANELS
+========================= */
+
+.panel {
+    width: min(600px, 100%);
+    margin: auto;
+    padding: 24px;
+    background: rgba(8,9,11,.98);
+    border: 1px solid var(--line);
+    box-shadow: 0 30px 100px rgba(0,0,0,.8);
+    animation: appear .4s ease both;
+}
+
+.panel-title {
+    margin: 0 0 24px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+}
+
+.settings-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    padding: 14px 0;
+    border-top: 1px solid var(--line);
+    font-size: 11px;
+}
+
+.setting-btn {
+    min-width: 72px;
+    min-height: 32px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.015);
+    cursor: pointer;
+    font-size: 9px;
+}
+
+.setting-btn:hover {
+    background: var(--hover);
+    border-color: #33373f;
+}
+
+.back {
+    margin-top: 20px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 9px;
+    letter-spacing: .1em;
+}
+
+.back:hover {
+    color: var(--text);
+}
+
+/* =========================
+   LOADING
+========================= */
+
+.loading {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    animation: appear .4s ease both;
+}
+
+.loading-title {
+    margin: 0;
+    font-size: clamp(16px, 3vw, 24px);
+    letter-spacing: .1em;
+    font-weight: 400;
+}
+
+.loading-status {
+    margin-top: 14px;
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: .1em;
+}
+
+.loading-dots {
+    display: inline-block;
+    width: 20px;
+}
+
+.loading-dots::after {
+    content: "";
+    animation: dots 1.2s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0% { content: ""; }
+    25% { content: "."; }
+    50% { content: ".."; }
+    75%, 100% { content: "..."; }
+}
+
+/* =========================
+   SURVEY
+========================= */
+
+.survey {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    animation: appear .5s ease both;
+}
+
+.topbar {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+    right: 24px;
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 9px;
+    letter-spacing: .12em;
+    z-index: 5;
+}
+
+.question {
+    width: min(900px, calc(100vw - 80px));
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: clamp(18px, 3vw, 28px);
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: -.01em;
+    text-align: center;
+}
+
+.question > div:first-child {
+    display: inline;
+}
+
+.typewriter {
+    display: inline;
+}
+
+.caret {
+    display: inline-block;
+    width: 2px;
+    height: .9em;
+    margin-left: 4px;
+    vertical-align: -.08em;
+    background: var(--text);
+    animation: caretBlink .7s steps(1) infinite;
+}
+
+@keyframes caretBlink {
+    0%, 45% { opacity: 1; }
+    46%, 100% { opacity: 0; }
+}
+
+.subquestion {
+    width: min(600px, calc(100vw - 80px));
+    margin: 18px auto 0;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.answers {
+    width: min(500px, calc(100vw - 80px));
+    display: grid;
+    gap: 8px;
+    margin-top: 30px;
+}
+
+.answer {
+    min-height: 42px;
+    padding: 12px 16px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.015);
+    color: #b8baae;
+    text-align: left;
+    cursor: pointer;
+    transition:
+        opacity .35s ease,
+        transform .35s ease,
+        background .18s ease,
+        border-color .18s ease,
+        box-shadow .18s ease;
+    font-size: 11px;
+}
+
+.answer:hover {
+    background: var(--hover);
+    border-color: #33373f;
+    transform: translateY(-1px);
+    box-shadow: var(--glow);
+}
+
+.answer:active {
+    transform: translateY(0);
+}
+
+.num {
+    margin-right: 12px;
+    color: #44484e;
+    font-size: 9px;
+}
+
+.location-note {
+    margin-top: 18px;
+    color: #888b92;
+    font-size: 11px;
+    line-height: 1.6;
+    animation: fadeIn 1s ease forwards;
+}
+
+.location-note strong {
+    color: #c8c9cb;
+    font-weight: 700;
+}
+
+.location-note::before {
+    content: "◦ ";
+    color: #55585e;
+}
+
+.input-wrap {
+    width: min(600px, calc(100vw - 80px));
+    display: flex;
+    gap: 8px;
+    margin-top: 30px;
+}
+
+.answer-input {
+    flex: 1;
+    min-height: 42px;
+    padding: 12px;
+    border: 1px solid var(--line);
+    outline: none;
+    background: #050608;
+    color: var(--text);
+    user-select: text;
+    font-size: 11px;
+}
+
+.answer-input:focus {
+    border-color: #44474e;
+}
+
+/* =========================
+   ENDING
+========================= */
+
+.center-message {
+    text-align: center;
+    animation: appear .7s ease both;
+}
+
+.center-message .big {
+    font-size: clamp(16px, 2.5vw, 24px);
+    letter-spacing: .08em;
+    font-weight: 400;
+}
+
+.center-message .small {
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 9px;
+    line-height: 2;
+    letter-spacing: .1em;
+}
+
+/* =========================
+   HORROR
+========================= */
+
+.glitch {
+    animation: glitch .12s steps(2, end) both;
+}
+
+.flash {
+    animation: flash .08s steps(2, end) both;
+}
+
+.shake {
+    animation: shake .15s ease-in-out both;
+}
+
+.bloodred {
+    color: #8b0000 !important;
+    border-color: #400000 !important;
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes glitch {
+    0% { transform: translate(0); filter: none; }
+    35% { transform: translate(-4px, 2px); filter: contrast(2.2) invert(.08); }
+    70% { transform: translate(5px, -2px); filter: brightness(0.6) saturate(3); }
+    100% { transform: none; filter: none; }
+}
+
+@keyframes flash {
+    0% { opacity: 1; background-color: transparent; }
+    30% { opacity: .05; background-color: #fff; }
+    100% { opacity: 1; background-color: transparent; }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translate(0, 0); }
+    20% { transform: translate(-6px, 4px); }
+    40% { transform: translate(6px, -4px); }
+    60% { transform: translate(-4px, -2px); }
+    80% { transform: translate(4px, 2px); }
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+    <div class="noise" id="noise"></div>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+
+    <main class="screen">
+
+        <section id="menu" class="menu">
+
+            <h1 class="brand">
+                THE QUESTIONNAIRE
+            </h1>
+
+            <div class="subtitle">
+                A PERSONAL EVALUATION
+            </div>
+
+            <div class="menu-buttons">
+
+                <button class="menu-btn" id="begin">
+                    BEGIN
+                </button>
+
+                <button class="menu-btn" id="settingsOpen">
+                    SETTINGS
+                </button>
+
+                <button class="menu-btn" id="aboutOpen">
+                    ABOUT
+                </button>
+
+            </div>
+
+            <div class="footer">
+                DO NOT LOOK AWAY
+            </div>
+
+        </section>
+
+
+        <section id="settings" class="panel hidden">
+
+            <h2 class="panel-title">
+                SETTINGS
+            </h2>
+
+            <div class="settings-row">
+                <span>Glow</span>
+                <button class="setting-btn" data-setting="glow"></button>
+            </div>
+
+            <div class="settings-row">
+                <span>Sounds</span>
+                <button class="setting-btn" data-setting="sounds"></button>
+            </div>
+
+            <div class="settings-row">
+                <span>Music</span>
+                <button class="setting-btn" data-setting="music"></button>
+            </div>
+
+            <div class="settings-row">
+                <span>Screen Effects</span>
+                <button class="setting-btn" data-setting="effects"></button>
+            </div>
+
+            <button class="back" id="settingsBack">
+                ← BACK
+            </button>
+
+        </section>
+
+
+        <section id="about" class="panel hidden">
+
+            <h2 class="panel-title">
+                ABOUT
+            </h2>
+
+            <p style="
+                color:#777b82;
+                font-size:10px;
+                line-height:1.8;
+                margin:0;
+            ">
+                An adaptive psychological simulation. It tracks your environment, 
+                your responses, and your presence in real-time. Do not proceed if unstable.
+            </p>
+
+            <button class="back" id="aboutBack">
+                ← BACK
+            </button>
+
+        </section>
+
+
+        <section id="loading" class="loading hidden">
+
+            <h2 class="loading-title">
+                ESTABLISHING CONNECTION<span class="loading-dots"></span>
+            </h2>
+
+            <div class="loading-status">
+                Mapping parameters
+            </div>
+
+        </section>
+
+
+        <section id="survey" class="survey hidden">
+
+            <div class="topbar">
+
+                <span>
+                    SUBJECT ACTIVE
+                </span>
+
+                <span id="counter">
+                    01 / 16
+                </span>
+
+            </div>
+
+            <div id="question" class="question"></div>
+
+            <div id="answers" class="answers"></div>
+
+        </section>
+
+
+        <section id="message" class="center-message hidden"></section>
+
+    </main>
+
+</div>
+
+
+<audio
+    id="bg"
+    src="bg.mp3"
+    loop
+    preload="auto">
+</audio>
+
+<audio
+    id="knock"
+    src="knock.mp3"
+    preload="auto">
+</audio>
+
+
+<script>
+
+const $ = id => document.getElementById(id);
+
+const screens = [
+    "menu",
+    "settings",
+    "about",
+    "loading",
+    "survey",
+    "message"
+];
+
+const state = {
+
+    glow: true,
+    sounds: true,
+    music: true,
+    effects: true,
+
+    index: 0,
+    started: false,
+    loading: false,
+    knockPlayed: false,
+
+    location: "your location",
+    localTime: "--:--",
+    device: "unknown"
+
+};
+
+
+/* =========================
+   QUESTIONS
+========================= */
+
+const questions = [
+
+    {
+        text: "How fast is your heart beating right now?",
+
+        answers: [
+            "Normal",
+            "Slightly fast",
+            "Racing",
+            "I can feel it in my ears"
+        ]
+    },
+
+    {
+        text: "Are you certain you are alone in your room?",
+
+        answers: [
+            "Yes, completely",
+            "I think so",
+            "No",
+            "I don't want to check"
+        ]
+    },
+
+    {
+        text: "Why did you lock your eyes on the center of the screen?",
+
+        answers: [
+            "Habit",
+            "To read the text",
+            "I'm afraid to look away",
+            "Mistake"
+        ]
+    },
+
+    {
+        text: "When was the last time you heard breathing that wasn't yours?",
+
+        answers: [
+            "Never",
+            "Earlier today",
+            "Just now",
+            "Stop asking"
+        ]
+    },
+
+    {
+        text: "There is a shadow shifting near your peripheral vision. Did you see it?",
+
+        answers: [
+            "No",
+            "Maybe",
+            "Yes",
+            "Don't trick me"
+        ],
+
+        after: "It's getting closer to your chair."
+    },
+
+    {
+        text: "What device are you using to let me watch you?",
+
+        answers: [
+            "Computer",
+            "Laptop",
+            "Tablet",
+            "Phone",
+            "Other"
+        ],
+
+        detect: true
+    },
+
+    {
+        text: "Why are you awake at {time} on a night like this?",
+
+        answers: [
+            "Insomnia",
+            "Bad habit",
+            "I couldn't sleep",
+            "Something forced me awake"
+        ],
+
+        time: true
+    },
+
+    {
+        text: "It is remarkably quiet outside your window in {location}. Can you hear what's waiting out there?",
+
+        answers: [
+            "It's just wind",
+            "There's someone outside",
+            "Shut up",
+            "Let me out"
+        ],
+
+        location: true
+    },
+
+    {
+        text: "Look closely at the dark reflection in your monitor. Is that really just you?",
+
+        answers: [
+            "Yes",
+            "No",
+            "It's smiling",
+            "I'm not looking"
+        ]
+    },
+
+    {
+        text: "Did you hear that sharp knock right behind your door?",
+
+        answers: [
+            "Yes",
+            "No",
+            "It was on my wall",
+            "It's already inside"
+        ],
+
+        knock: true
+    },
+
+    {
+        text: "Do you recognize the breathing pattern coming through your speakers?",
+
+        answers: [
+            "It's mine",
+            "It's heavier than mine",
+            "It's right beside me",
+            "Cut the audio"
+        ],
+
+        response: "It doesn't match yours."
+    },
+
+    {
+        text: "How many times have you tried to close this tab and failed?",
+
+        answers: [
+            "Once",
+            "Several times",
+            "The button is gone",
+            "I can't move my cursor"
+        ],
+
+        response: "The door is locked."
+    },
+
+    {
+        text: "Do you give permission for the entity in your room to step closer?",
+
+        answers: [
+            "NO",
+            "NO",
+            "NO",
+            "NO"
+        ],
+
+        blackout: true
+    },
+
+    {
+        text: "Why did you think ignoring it would make it go away?",
+
+        answers: [
+            "It was my only choice",
+            "I was terrified",
+            "I made a mistake",
+            "Please stop"
+        ],
+
+        response: "Too late."
+    },
+
+    {
+        text: "Turn around.",
+
+        answers: [
+            "I won't",
+            "I can't",
+            "It's already touching my shoulder",
+            "..."
+        ],
+
+        scare: true
+    },
+
+    {
+        text: "Look at me.",
+
+        input: true
+    }
+
+];
+
+
+/* =========================
+   SCREEN MANAGEMENT
+========================= */
+
+function show(id) {
+
+    screens.forEach(screen => {
+
+        $(screen).classList.toggle(
+            "hidden",
+            screen !== id
+        );
+
+    });
+
+}
+
+
+/* =========================
+   SETTINGS
+========================= */
+
+function updateSettings() {
+
+    document
+        .querySelectorAll("[data-setting]")
+        .forEach(button => {
+
+            const key =
+                button.dataset.setting;
+
+            button.textContent =
+                state[key]
+                    ? "ON"
+                    : "OFF";
+
+        });
+
+    document.documentElement
+        .style
+        .setProperty(
+            "--glow",
+            state.glow
+                ? "0 0 20px rgba(200,205,210,.08)"
+                : "none"
+        );
+
+}
+
+
+/* =========================
+   MENU MUSIC (bg.mp3)
+========================= */
+
+async function startMenuMusic() {
+
+    if (
+        !state.music ||
+        state.started
+    ) {
+        return;
+    }
+
+    const bg =
+        $("bg");
+
+    try {
+
+        await bg.play();
+
+    } catch (error) {
+
+    }
+
+}
+
+function stopMenuMusic() {
+
+    const bg =
+        $("bg");
+
+    bg.pause();
+
+    bg.currentTime = 0;
+
+}
+
+
+/* =========================
+   TIME
+========================= */
+
+function getTemporalContext() {
+
+    const now = new Date();
+
+    const hour = now.getHours();
+    const minute = now.getMinutes();
+
+    let phase;
+
+    if (hour >= 0 && hour < 5) {
+        phase = "the dead of night";
+    } else if (hour < 8) {
+        phase = "the early morning";
+    } else if (hour < 12) {
+        phase = "the morning";
+    } else if (hour < 17) {
+        phase = "the afternoon";
+    } else if (hour < 21) {
+        phase = "the evening";
+    } else {
+        phase = "the late night";
+    }
+
+    const time = now.toLocaleTimeString([], {
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit"
+    });
+
+    const date = now.toLocaleDateString([], {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    });
+
+    const timezone = Intl.DateTimeFormat()
+        .resolvedOptions()
+        .timeZone || "local timezone";
+
+    const offsetMinutes = -now.getTimezoneOffset();
+    const sign = offsetMinutes >= 0 ? "+" : "-";
+    const absoluteOffset = Math.abs(offsetMinutes);
+    const offsetHours = Math.floor(absoluteOffset / 60);
+    const offsetRemainder = absoluteOffset % 60;
+    const utcOffset =
+        "UTC" + sign +
+        String(offsetHours).padStart(2, "0") +
+        ":" +
+        String(offsetRemainder).padStart(2, "0");
+
+    const minutesSinceMidnight = hour * 60 + minute;
+
+    return {
+        now,
+        hour,
+        minute,
+        time,
+        date,
+        phase,
+        timezone,
+        utcOffset,
+        minutesSinceMidnight
+    };
+
+}
+
+function timeOfDay() {
+    return getTemporalContext().phase;
+}
+
+function getLocalTime() {
+    return getTemporalContext().time;
+}
+
+function getTimeNarrative() {
+
+    const context = getTemporalContext();
+
+    return `${context.time} during ${context.phase}`;
+}
+
+
+/* =========================
+   DEVICE
+========================= */
+
+function detectDevice() {
+
+    const ua =
+        navigator.userAgent
+            .toLowerCase();
+
+    if (/tablet|ipad/.test(ua)) {
+        return "tablet";
+    }
+
+    if (/mobile|android|iphone/.test(ua)) {
+        return "phone";
+    }
+
+    return "computer";
+
+}
+
+
+/* =========================
+   LOCATION
+========================= */
+
+async function getLocationName() {
+
+    try {
+
+        const response =
+            await fetch(
+                "https://ipapi.co/json/",
+                {
+                    cache: "no-store"
+                }
+            );
+
+        if (!response.ok) {
+            throw new Error();
+        }
+
+        const data =
+            await response.json();
+
+        const parts = [];
+
+        if (data.city) {
+            parts.push(data.city);
+        }
+
+        if (data.region) {
+            parts.push(data.region);
+        }
+
+        if (data.country_name) {
+            parts.push(data.country_name);
+        }
+
+        if (parts.length) {
+            return parts.join(", ");
+        }
+
+    } catch (error) {
+
+    }
+
+    try {
+
+        const timezone =
+            Intl.DateTimeFormat()
+                .resolvedOptions()
+                .timeZone;
+
+        const zones = {
+
+            "Asia/Dhaka": "Bangladesh",
+            "Asia/Kolkata": "India",
+            "Europe/London": "United Kingdom",
+            "America/New_York": "United States",
+            "America/Los_Angeles": "United States"
+
+        };
+
+        return zones[timezone] ||
+            timezone ||
+            "your isolated room";
+
+    } catch (error) {
+
+        return "your isolated room";
+
+    }
+
+}
+
+
+/* =========================
+   HORROR EFFECTS
+========================= */
+
+function flicker(type = "glitch") {
+
+    if (!state.effects) {
+        return;
+    }
+
+    const app =
+        $("app");
+
+    app.classList.remove(type);
+
+    void app.offsetWidth;
+
+    app.classList.add(type);
+
+    setTimeout(() => {
+
+        app.classList.remove(type);
+
+    }, 300);
+
+}
+
+
+/* =========================
+   DELAY
+========================= */
+
+function delay(ms) {
+
+    return new Promise(
+        resolve =>
+            setTimeout(resolve, ms)
+    );
+
+}
+
+
+/* =========================
+   LOADING
+========================= */
+
+async function prepareSurvey() {
+
+    const locationPromise =
+        getLocationName();
+
+    state.device =
+        detectDevice();
+
+    const temporal =
+        getTemporalContext();
+
+    state.localTime =
+        temporal.time;
+
+    state.location =
+        await locationPromise;
+
+    // Keep the loading phase deterministic while still allowing
+    // network-based location detection to finish.
+    await delay(1500);
+
+}
+
+
+/* =========================
+   TYPEWRITER
+========================= */
+
+async function typeQuestion(text) {
+
+    const question =
+        $("question");
+
+    question.innerHTML = "";
+
+    const line =
+        document.createElement("div");
+
+    line.className =
+        "typewriter";
+
+    const caret =
+        document.createElement("span");
+
+    caret.className =
+        "caret";
+
+    line.appendChild(caret);
+
+    question.appendChild(line);
+
+    for (
+        let i = 0;
+        i < text.length;
+        i++
+    ) {
+
+        await delay(25);
+
+        caret.before(
+            document.createTextNode(
+                text[i]
+            )
+        );
+
+    }
+
+    await delay(200);
+
+    caret.remove();
+
+}
+
+
+/* =========================
+   RENDER QUESTION
+========================= */
+
+async function renderQuestion() {
+
+    const question =
+        questions[state.index];
+
+    $("counter").textContent =
+        String(state.index + 1)
+            .padStart(2, "0") +
+        " / 16";
+
+    $("question").innerHTML = "";
+    $("answers").innerHTML = "";
+
+    let text =
+        question.text;
+
+    const temporal =
+        getTemporalContext();
+
+    if (question.location) {
+
+        text =
+            text.replaceAll(
+                "{location}",
+                state.location
+            );
+
+    }
+
+    if (question.time) {
+
+        text =
+            text.replaceAll(
+                "{time}",
+                getTimeNarrative()
+            );
+
+    }
+
+    // Prevent unresolved template tokens from ever reaching the screen.
+    text =
+        text.replaceAll(
+            /\\{(time|location)\\}/g,
+            "the current moment"
+        );
+
+    await typeQuestion(text);
+
+    if (question.time) {
+
+        const note =
+            document.createElement("div");
+
+        note.className =
+            "location-note";
+
+        note.innerHTML =
+            "LOCAL TIME: <strong>" +
+            temporal.time +
+            "</strong>" +
+            " · " +
+            temporal.date +
+            "<br>" +
+            "ZONE: " +
+            temporal.timezone +
+            " (" +
+            temporal.utcOffset +
+            ")";
+
+        $("question")
+            .appendChild(note);
+
+    }
+
+    if (question.detect) {
+
+        const note =
+            document.createElement("div");
+
+        note.className =
+            "subquestion";
+
+        note.textContent =
+            "Target Hardware: " +
+            state.device +
+            " — Camera feed active.";
+
+        $("question")
+            .appendChild(note);
+
+    }
+
+    if (question.input) {
+
+        const wrap =
+            document.createElement("div");
+
+        wrap.className =
+            "input-wrap";
+
+        const input =
+            document.createElement("input");
+
+        input.className =
+            "answer-input";
+
+        input.placeholder =
+            "Type your final words...";
+
+        input.autocomplete =
+            "off";
+
+        const button =
+            document.createElement("button");
+
+        button.className =
+            "answer";
+
+        button.textContent =
+            "SUBMIT";
+
+        button.style.opacity = "0";
+
+        button.onclick = () => {
+
+            answer(
+                input.value || ""
+            );
+
+        };
+
+        wrap.append(
+            input,
+            button
+        );
+
+        $("answers")
+            .appendChild(wrap);
+
+        setTimeout(() => {
+
+            button.style.opacity =
+                "1";
+
+        }, 100);
+
+        input.focus();
+
+    } else {
+
+        question.answers
+            .forEach(
+                (answerText, index) => {
+
+                    const button =
+                        document.createElement(
+                            "button"
+                        );
+
+                    button.className =
+                        "answer";
+
+                    button.innerHTML =
+                        '<span class="num">' +
+                        String(index + 1)
+                            .padStart(2, "0") +
+                        "</span>" +
+                        answerText;
+
+                    button.style.opacity =
+                        "0";
+
+                    button.style.transform =
+                        "translateY(6px)";
+
+                    button.onclick = () => {
+
+                        answer(
+                            answerText
+                        );
+
+                    };
+
+                    $("answers")
+                        .appendChild(button);
+
+                    setTimeout(() => {
+
+                        button.style.opacity =
+                            "1";
+
+                        button.style.transform =
+                            "translateY(0)";
+
+                    }, 80 + index * 50);
+
+                }
+            );
+
+    }
+
+
+    /* Knock */
+
+    if (
+        question.knock &&
+        state.sounds &&
+        !state.knockPlayed
+    ) {
+
+        state.knockPlayed = true;
+
+        setTimeout(() => {
+
+            const knock =
+                $("knock");
+
+            knock.currentTime = 0;
+
+            knock.play()
+                .catch(() => {});
+
+        }, 1200);
+
+    }
+
+
+    /* Flickers & Jumpscares */
+
+    if (state.index === 4) {
+        setTimeout(() => flicker("flash"), 800);
+    }
+
+    if (state.index === 7) {
+        setTimeout(() => flicker("shake"), 600);
+    }
+
+    if (state.index === 9) {
+        setTimeout(() => flicker("glitch"), 500);
+    }
+
+    if (state.index === 12) {
+        setTimeout(() => flicker("flash"), 400);
+    }
+
+    if (state.index === 14) {
+        setTimeout(() => flicker("glitch"), 300);
+        setTimeout(() => flicker("shake"), 900);
+    }
+
+}
+
+
+/* =========================
+   ANSWERS
+========================= */
+
+function answer(value) {
+
+    const question =
+        questions[state.index];
+
+    if (question.response) {
+
+        const response =
+            document.createElement(
+                "div"
+            );
+
+        response.className =
+            "subquestion bloodred";
+
+        response.textContent =
+            question.response;
+
+        $("answers")
+            .appendChild(response);
+
+        setTimeout(
+            next,
+            1000
+        );
+
+        return;
+
+    }
+
+    if (question.after) {
+
+        const response =
+            document.createElement(
+                "div"
+            );
+
+        response.className =
+            "subquestion bloodred";
+
+        response.textContent =
+            question.after;
+
+        $("answers")
+            .appendChild(response);
+
+        setTimeout(
+            next,
+            1100
+        );
+
+        return;
+
+    }
+
+    if (
+        question.blackout
+    ) {
+
+        flicker("shake");
+        const message =
+            $("message");
+
+        message.innerHTML =
+            '<div class="big bloodred">' +
+            "YOUR CONSENT WAS NOT REQUIRED." +
+            "</div>";
+
+        show("message");
+
+        setTimeout(() => {
+
+            show("survey");
+
+            next();
+
+        }, 1500);
+
+        return;
+
+    }
+
+    if (question.scare) {
+        flicker("glitch");
+    }
+
+    next();
+
+}
+
+
+/* =========================
+   NEXT
+========================= */
+
+function next() {
+
+    if (
+        state.index >=
+        questions.length - 1
+    ) {
+
+        finish();
+
+        return;
+
+    }
+
+    state.index++;
+
+    renderQuestion();
+
+}
+
+
+/* =========================
+   ENDING
+========================= */
+
+function finish() {
+
+    show("message");
+
+    const message =
+        $("message");
+
+    message.innerHTML =
+        '<div class="big">' +
+        "EVALUATION COMPLETE." +
+        "</div>";
+
+    setTimeout(() => {
+        flicker("flash");
+        message.innerHTML =
+            '<div class="big bloodred">' +
+            "IT HAS FOUND YOU." +
+            "</div>";
+    }, 1500);
+
+    setTimeout(() => {
+        message.innerHTML =
+            '<div class="big">' +
+            "Look behind you." +
+            "</div>";
+    }, 3200);
+
+    setTimeout(() => {
+        flicker("shake");
+        message.innerHTML =
+            '<div class="big bloodred" style="font-size:clamp(20px, 4vw, 32px);">' +
+            "DON'T MOVE." +
+            "</div>";
+    }, 5000);
+
+}
+
+
+/* =========================
+   MENU
+========================= */
+
+$("begin").onclick = async () => {
+
+    if (
+        state.loading ||
+        state.started
+    ) {
+        return;
+    }
+
+    state.loading = true;
+
+    show("loading");
+
+    stopMenuMusic();
+
+    await prepareSurvey();
+
+    state.started = true;
+    state.loading = false;
+    state.index = 0;
+    state.knockPlayed = false;
+
+    show("survey");
+
+    renderQuestion();
+
+};
+
+
+$("settingsOpen").onclick = () => {
+
+    updateSettings();
+
+    show("settings");
+
+};
+
+
+$("aboutOpen").onclick = () => {
+
+    show("about");
+
+};
+
+
+$("settingsBack").onclick = () => {
+
+    show("menu");
+
+};
+
+
+$("aboutBack").onclick = () => {
+
+    show("menu");
+
+};
+
+
+/* =========================
+   SETTINGS BUTTONS
+========================= */
+
+document
+    .querySelectorAll("[data-setting]")
+    .forEach(button => {
+
+        button.onclick = () => {
+
+            const key =
+                button.dataset.setting;
+
+            state[key] =
+                !state[key];
+
+            if (
+                key === "music" &&
+                state.music
+            ) {
+                startMenuMusic();
+            } else if (
+                key === "music" &&
+                !state.music
+            ) {
+                stopMenuMusic();
+            }
+
+            updateSettings();
+
+        };
+
+    });
+
+
+/* =========================
+   INITIALIZATION
+========================= */
+
+updateSettings();
+
+// Trigger menu music when interacting with document if permitted
+document.addEventListener('click', () => {
+    if (!state.started && state.music) {
+        startMenuMusic();
+    }
+}, { once: true });
+
+</script>
+
+</body>
+</html>
