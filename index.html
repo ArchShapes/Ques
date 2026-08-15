@@ -597,17 +597,122 @@ body.finale {
     0%, 100% { background-color: #030304; }
     50% { background-color: #0a0202; }
 }
+
+/* =========================
+   RUST / DECAY ATMOSPHERE
+========================= */
+
+.rust-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 15;
+    opacity: .16;
+    mix-blend-mode: multiply;
+    background-image:
+        radial-gradient(ellipse at 15% 20%, rgba(120, 50, 20, .5) 0%, transparent 45%),
+        radial-gradient(ellipse at 85% 75%, rgba(90, 35, 15, .45) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 95%, rgba(100, 40, 10, .4) 0%, transparent 55%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='r'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.6' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.6 0 0 0 0.1  0 0.25 0 0 0.04  0 0 0.1 0 0.01  0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23r)'/%3E%3C/svg%3E");
+    animation: rustDrift 26s linear infinite;
+}
+
+@keyframes rustDrift {
+    0% { transform: translate(0, 0) scale(1.02); }
+    50% { transform: translate(-1.5%, 1%) scale(1.04); }
+    100% { transform: translate(0, 0) scale(1.02); }
+}
+
+.sickly-flicker {
+    animation: sicklyFlicker 6.5s ease-in-out infinite;
+}
+
+@keyframes sicklyFlicker {
+    0%, 92%, 100% { filter: none; }
+    93% { filter: sepia(.35) hue-rotate(-15deg) contrast(1.15) brightness(.85); }
+    94% { filter: none; }
+    95% { filter: sepia(.5) hue-rotate(-20deg) brightness(.7); }
+    96% { filter: none; }
+}
+
+.warp-text {
+    animation: warpText .4s ease both;
+}
+
+@keyframes warpText {
+    0% { transform: scaleY(1) skewX(0deg); filter: none; }
+    30% { transform: scaleY(1.15) skewX(3deg); filter: blur(.6px) contrast(1.4); }
+    60% { transform: scaleY(.9) skewX(-4deg); filter: sepia(.3) blur(.3px); }
+    100% { transform: scaleY(1) skewX(0deg); filter: none; }
+}
+
+/* =========================
+   BSOD
+========================= */
+
+.bsod {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: #0000aa;
+    color: #ffffff;
+    font-family: "Space Mono", monospace;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.bsod.on {
+    animation: bsodFlash 1s steps(1, end) both;
+}
+
+.bsod-content {
+    max-width: 640px;
+}
+
+.bsod-content .sad {
+    font-size: clamp(28px, 6vw, 46px);
+    margin-bottom: 18px;
+}
+
+.bsod-content .body-text {
+    font-size: 12px;
+    line-height: 1.7;
+    letter-spacing: .02em;
+}
+
+@keyframes bsodFlash {
+    0% { opacity: 0; }
+    5% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; }
+}
 </style>
 </head>
 
 <body>
 
-<div id="app">
+<div id="app" class="sickly-flicker">
 
     <div class="noise" id="noise"></div>
     <div class="scanlines"></div>
     <div class="vignette" id="vignette"></div>
     <div class="static-burst" id="staticBurst"></div>
+    <div class="rust-layer"></div>
+    <div class="bsod" id="bsod">
+        <div class="bsod-content">
+            <div class="sad">:(</div>
+            <div class="body-text">
+                YOUR SYSTEM RAN INTO A PROBLEM AND NEEDS TO RESTART.<br>
+                WE ARE JUST COLLECTING SOME INFORMATION, THEN WE WILL RESTART FOR YOU.<br><br>
+                0% COMPLETE
+            </div>
+        </div>
+    </div>
 
     <main class="screen">
 
@@ -689,8 +794,9 @@ body.finale {
                 line-height:1.8;
                 margin:0;
             ">
-                An adaptive psychological simulation. It tracks your environment, 
-                your responses, and your presence in real-time. Do not proceed if unstable.
+                An adaptive psychological simulation. Something old lives underneath it —
+                it tracks your environment, your responses, and your presence in real-time.
+                The hardware sometimes remembers things it shouldn't. Do not proceed if unstable.
             </p>
 
             <button class="back" id="aboutBack">
@@ -1373,6 +1479,126 @@ function enterFinale() {
 
 
 /* =========================
+   SYNTHESIZED BEEP (no audio file)
+========================= */
+
+let audioCtx = null;
+
+function getAudioCtx() {
+
+    if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx) {
+            audioCtx = new Ctx();
+        }
+    }
+
+    return audioCtx;
+
+}
+
+function playErrorBeep() {
+
+    if (!state.sounds) {
+        return;
+    }
+
+    const ctx = getAudioCtx();
+
+    if (!ctx) {
+        return;
+    }
+
+    if (ctx.state === "suspended") {
+        ctx.resume().catch(() => {});
+    }
+
+    const now = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "square";
+    osc.frequency.setValueAtTime(830, now);
+
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.12, now + 0.01);
+    gain.gain.setValueAtTime(0.12, now + 0.85);
+    gain.gain.linearRampToValueAtTime(0, now + 0.95);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 1);
+
+}
+
+
+/* =========================
+   BSOD FLASH
+========================= */
+
+function triggerBsod() {
+
+    if (!state.effects) {
+        return;
+    }
+
+    playErrorBeep();
+
+    const bsod =
+        $("bsod");
+
+    bsod.classList.remove("on");
+
+    void bsod.offsetWidth;
+
+    bsod.classList.add("on");
+
+    setTimeout(() => {
+
+        bsod.classList.remove("on");
+
+    }, 1000);
+
+}
+
+
+/* =========================
+   RANDOM KNOCK (unscripted)
+========================= */
+
+function playRandomKnock(forceLoud) {
+
+    if (!state.sounds) {
+        return;
+    }
+
+    const knock =
+        $("knock");
+
+    knock.currentTime = 0;
+
+    const loudRoll =
+        forceLoud ? 1 : Math.random();
+
+    if (loudRoll < 0.4) {
+        knock.volume = 0.15 + Math.random() * 0.1;
+    } else if (loudRoll < 0.75) {
+        knock.volume = 0.5 + Math.random() * 0.15;
+    } else {
+        knock.volume = 1;
+        flicker("shake");
+    }
+
+    knock.play()
+        .catch(() => {});
+
+}
+
+
+/* =========================
    PHANTOM TYPING
 ========================= */
 
@@ -1526,6 +1752,16 @@ async function typeQuestion(text) {
 
     caret.remove();
 
+    if (state.effects && Math.random() < 0.3) {
+
+        line.classList.add("warp-text");
+
+        setTimeout(() => {
+            line.classList.remove("warp-text");
+        }, 400);
+
+    }
+
 }
 
 
@@ -1545,6 +1781,23 @@ async function renderQuestion() {
 
     $("question").innerHTML = "";
     $("answers").innerHTML = "";
+
+    // Unscripted ambient knock — small random chance per question,
+    // independent of the scripted "knock" question, so it can
+    // strike anywhere and never plays predictably.
+    if (
+        !question.knock &&
+        state.index > 0 &&
+        Math.random() < 0.18
+    ) {
+
+        setTimeout(() => {
+
+            playRandomKnock();
+
+        }, 900 + Math.random() * 1800);
+
+    }
 
     let text =
         question.text;
@@ -1789,25 +2042,7 @@ async function renderQuestion() {
 
         setTimeout(() => {
 
-            const knock =
-                $("knock");
-
-            knock.currentTime = 0;
-
-            const loudRoll =
-                Math.random();
-
-            if (loudRoll < 0.4) {
-                knock.volume = 0.15 + Math.random() * 0.1;
-            } else if (loudRoll < 0.75) {
-                knock.volume = 0.5 + Math.random() * 0.15;
-            } else {
-                knock.volume = 1;
-                flicker("shake");
-            }
-
-            knock.play()
-                .catch(() => {});
+            playRandomKnock();
 
         }, 1200);
 
@@ -1836,6 +2071,10 @@ async function renderQuestion() {
         setTimeout(() => deepenDread(), 700);
     }
 
+    if (state.index === 10) {
+        setTimeout(() => triggerBsod(), 900);
+    }
+
     if (question.tear) {
         setTimeout(() => tearScreen(), 450);
     }
@@ -1850,15 +2089,7 @@ async function renderQuestion() {
         setTimeout(() => tearScreen(), 500);
         setTimeout(() => flicker("shake"), 850);
         setTimeout(() => staticBurst(), 1100);
-
-        if (state.sounds) {
-            setTimeout(() => {
-                const knock = $("knock");
-                knock.currentTime = 0;
-                knock.volume = 1;
-                knock.play().catch(() => {});
-            }, 1400);
-        }
+        setTimeout(() => playRandomKnock(true), 1400);
     }
 
     if (question.finale) {
