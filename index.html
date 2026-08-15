@@ -1777,7 +1777,7 @@ async function renderQuestion() {
     }
 
 
-    /* Knock */
+    /* Knock — volume varies: sometimes barely audible, sometimes jarring */
 
     if (
         question.knock &&
@@ -1793,6 +1793,18 @@ async function renderQuestion() {
                 $("knock");
 
             knock.currentTime = 0;
+
+            const loudRoll =
+                Math.random();
+
+            if (loudRoll < 0.4) {
+                knock.volume = 0.15 + Math.random() * 0.1;
+            } else if (loudRoll < 0.75) {
+                knock.volume = 0.5 + Math.random() * 0.15;
+            } else {
+                knock.volume = 1;
+                flicker("shake");
+            }
 
             knock.play()
                 .catch(() => {});
@@ -1838,6 +1850,15 @@ async function renderQuestion() {
         setTimeout(() => tearScreen(), 500);
         setTimeout(() => flicker("shake"), 850);
         setTimeout(() => staticBurst(), 1100);
+
+        if (state.sounds) {
+            setTimeout(() => {
+                const knock = $("knock");
+                knock.currentTime = 0;
+                knock.volume = 1;
+                knock.play().catch(() => {});
+            }, 1400);
+        }
     }
 
     if (question.finale) {
